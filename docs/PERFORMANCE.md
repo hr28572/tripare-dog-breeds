@@ -1,27 +1,39 @@
 # Performance
 
-All numbers below are measured, not estimated. Device figures come from an iPhone 16 Pro
-running the app in **Expo Go** (development bundle: unminified JS, dev-mode React, Expo Go's
-own overhead), captured 2026-09-19 with Expo's performance monitor and the app's built-in
-perf marks (Settings → Performance in dev builds). A release build will be faster and lighter
-on every axis.
+All numbers below are measured, not estimated. Two environments were used, both on
+2026-09-19:
+
+- **Release build** (`expo prebuild` + `gradlew assembleRelease`, Hermes bytecode, no dev
+  tooling) installed on a Pixel 7 API 35 Android emulator with software GL. Used for the
+  process-level memory and startup numbers, because those are only meaningful for a
+  standalone app.
+- **Expo Go** on an iPhone 16 Pro (development bundle) with Expo's performance monitor and
+  the app's built-in perf marks (Settings → Performance in dev builds). Used for frame rates
+  and interaction timings.
 
 ## Targets vs measured
 
 | Target | Measured | Status |
 |---|---|---|
-| Initial load to interactive with cached data < 3 s | **284 ms** from JS start to first breed row (`startup.firstRow`) | ✅ |
-| 60 fps scroll through all 283 breeds | UI **60 fps**, JS **56–60 fps** | ✅ |
-| Memory < 150 MB | Hermes JS heap **31–39 MB**; Expo Go process RSS 322–478 MB (see note) | ✅ for the app's own heap; process figure is Expo Go |
+| Initial load to interactive with cached data < 3 s | Release build, warm start: activity displayed in **574 ms**, list with rows on screen by **~1 s** (`am start -W` + screenshots at 0.5 s intervals). Expo Go: **266–284 ms** JS start → first row | ✅ |
+| 60 fps scroll through all 283 breeds | UI **60 fps**, JS **56–60 fps** (Expo Go, iPhone) | ✅ |
+| Memory < 150 MB under normal use | Release build PSS: **134–141 MB** at rest, **138–160 MB (median ~150)** while flinging through the whole list; **184–226 MB** only during the one-time first-launch sync + thumbnail prefetch (see note) | ✅ at rest and browsing; marginal during continuous fast scrolling; exceeded only during the initial sync |
 | Search / filter interaction stays smooth | UI/JS **60 fps** during typing and chip toggles; list re-query 18–55 ms | ✅ |
 
-**Memory note.** Expo's monitor reports RAM for the whole Expo Go process, which hosts the
-Expo Go shell, its dev tooling, the performance monitor overlay and every native module in
-the Go runtime, not just this app. The figure that isolates this app's data and UI is the
-Hermes heap: 31–39 MB with all 283 breeds, 7,062 image rows and the list mounted. A
-standalone release build was not produced for this submission (no EAS account configured),
-so a process-level number for the app alone is not available; it would need a development
-or release build to measure.
+**Memory note.** `dumpsys meminfo` on the release build breaks the ~134 MB resting PSS down
+as ~12 MB Java heap, ~50 MB native heap (Hermes + SQLite + decoded thumbnails), ~47 MB code
+(the JS bundle and native libraries mapped in) and ~22 MB private other. While flinging
+through the list the native heap grows to ~70–105 MB as expo-image's memory cache fills
+with decoded thumbnails, taking PSS to a 160 MB peak, then settles back to ~140 MB. The
+first launch is the exception: while the 6 API pages are parsed, 7,062 rows are inserted
+and 283 thumbnails are downloaded and decoded concurrently, PSS reaches 184 MB idle and
+226 MB if the user scrolls at the same time; this is a one-time event and drops once the
+sync finishes. Two caveats cut both ways: the emulator uses software OpenGL, so image
+surfaces that a real GPU would hold in graphics memory are counted in the native heap here;
+and an emulator has no memory pressure from other apps, so expo-image never trims its cache.
+The scroll peak is therefore an upper bound. Screenshot: `screenshots/08-memory-scroll.png`.
+In Expo Go the Hermes heap alone was 31–39 MB; the Expo Go process figure (322–478 MB)
+includes the Go shell and dev tooling and is not representative.
 
 ## Bundle size
 
@@ -33,6 +45,12 @@ or release build to measure.
 | Android JS bundle (`.hbc`) | **3.80 MB** |
 | Assets (53 files) | 5.0 MB |
 | Export total | 12 MB |
+| Android release APK, universal (all 4 ABIs, no ABI splits, no resource shrinking) | 108 MB |
+
+The universal APK is dominated by native libraries × 4 ABIs (Hermes, React Native, SQLite,
+Reanimated, expo-image, Skia-free). A per-ABI split or an AAB delivered through Play would
+ship roughly a quarter of that per device; that packaging is deliberately out of scope
+("production deployment setup" is listed as not expected).
 
 The assets are dominated by `@expo/vector-icons` font files (every font family ships with
 the package even though only Ionicons is used; MaterialIcons alone is 357 KB) and the
@@ -42,8 +60,13 @@ FlashList and expo-image.
 
 ## Startup
 
-`startup.firstRow` measures from JS start (module load of `src/utils/perf.ts`) to the first
-render that contains breed rows, with 283 breeds already cached:
+**Release build, warm start with cached data** (`adb shell am start -W`): the activity is
+displayed after **574 ms**; screenshots taken every 0.5 s show the splash at 0.5 s and the
+full grouped list with thumbnails at 1.0 s. First-ever launch (empty cache) displayed the
+activity in 3.1 s and completed the 283-breed sync in the background behind the banner.
+
+`startup.firstRow` (in-app mark) measures from JS start to the first render that contains
+breed rows, with 283 breeds already cached, in Expo Go:
 
 | Run | ms |
 |---|---|
@@ -51,9 +74,7 @@ render that contains breed rows, with 283 breeds already cached:
 | Cold reload 2 | 284 |
 
 That includes running Drizzle migrations, hydrating the sync store from `sync_meta`, the
-first `listBreedRows` query, section building and the first FlashList layout. In Expo Go the
-visible wall-clock start is dominated by downloading the dev bundle from Metro over Wi-Fi
-(~3–4 s), which does not exist in a release build.
+first `listBreedRows` query, section building and the first FlashList layout.
 
 ## Scroll
 

@@ -122,21 +122,21 @@ Summarized from [docs/DECISIONS.md](docs/DECISIONS.md), which has the rationale 
 
 ## Performance report
 
-Measured on an iPhone 16 Pro in Expo Go (development bundle). Full tables and method in
-[docs/PERFORMANCE.md](docs/PERFORMANCE.md).
+Frame rates from an iPhone 16 Pro in Expo Go; memory and startup from a release APK on a
+Pixel 7 emulator. Full tables and method in [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 
 | Metric | Result |
 |---|---|
-| JS bundle (production Hermes bytecode) | iOS 3.52 MB · Android 3.80 MB |
-| Load to first breed row with cached data | 266–284 ms (target < 3 s) |
+| JS bundle (production Hermes bytecode) | iOS 3.52 MB · Android 3.80 MB · universal release APK 108 MB |
+| Load to interactive with cached data (release, warm start) | activity 574 ms, list on screen ~1 s (target < 3 s) |
 | Scroll through all 283 breeds | UI 60 fps · JS 56–60 fps |
 | Search / filter interactions | 60 fps · list re-query 18–55 ms |
-| JS heap with the full list mounted | 31–39 MB (target < 150 MB) |
+| Process memory, release build (PSS) | 134–141 MB at rest · 138–160 MB while flinging the full list · up to 226 MB only during the first-launch sync (target < 150 MB) |
 | Full sync (6 pages + 7,062 image rows + thumb prefetch) | 8.9 s, in the background |
 
-The process-level RAM Expo's monitor shows (322–478 MB) is the Expo Go host including its
-dev tooling; the app's own heap is the Hermes figure. A standalone build was not produced
-for this submission.
+Memory screenshot: [docs/screenshots/08-memory-scroll.png](docs/screenshots/08-memory-scroll.png)
+(`dumpsys meminfo` during scroll). Profiler during a full-list scroll:
+[docs/screenshots/07-profiler-scroll.png](docs/screenshots/07-profiler-scroll.png).
 
 ## Screenshots
 
@@ -149,7 +149,6 @@ for this submission.
 | ![Traits tab](docs/screenshots/04-detail-traits.png) | ![Gallery tab with attribution](docs/screenshots/05-detail-gallery.png) | ![Offline banner](docs/screenshots/06-offline-banner.png) |
 
 The filter sheet itself: [docs/screenshots/03b-filter-sheet.png](docs/screenshots/03b-filter-sheet.png).
-Performance monitor during a full-list scroll: [docs/screenshots/07-profiler-scroll.png](docs/screenshots/07-profiler-scroll.png).
 
 ## Offline behaviour
 
