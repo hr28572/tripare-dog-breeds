@@ -51,8 +51,10 @@ env:
 - inputText: "affen"
 - assertVisible: "Affenpinscher"
 
-# Apply a filter (size band chip) — the result count updates and the badge appears
-- tapOn: "Small"
+# Apply a filter (size band chip) — the result count updates and the badge appears.
+# Target the chip's accessibility label: the plain text "Small" also matches the
+# size badge on the Affenpinscher row, which is what got tapped on CI.
+- tapOn: "Small size"
 - assertVisible: "Filters · 1"
 - assertVisible: "Affenpinscher"
 
