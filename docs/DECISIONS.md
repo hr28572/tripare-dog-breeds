@@ -154,3 +154,32 @@ time a project loads on Android, so the flow presses back when that sheet is vis
 Maestro's `hideKeyboard` is a back press on Android, which leaves the project, so the flow
 never calls it. It was run on a Pixel 7 API 35 emulator with Expo Go 57.0.9; the flow passes
 in about a minute once breeds are cached.
+
+## 9. RNRepo prebuilt native artifacts
+
+`@rnrepo/expo-config-plugin` (Software Mansion) is registered in `app.json`. At prebuild it
+adds the RNRepo Maven repository and Gradle plugin to the Android project; at build time the
+plugin substitutes supported community libraries' Gradle projects with prebuilt `.aar`
+artifacts matching the exact library and React Native versions, so their C++/Kotlin is
+downloaded instead of compiled. SDK 57 / RN 0.86 runs the New Architecture by default, so no
+architecture flags were needed.
+
+Measured on this project (Apple Silicon, warm Gradle caches, identical clean `android/`
+folders, `:app:assembleRelease`, the task `expo run:android` invokes):
+
+| | Build time | Gradle tasks | Modules compiled natively (CMake) |
+|---|---|---|---|
+| From source (`DISABLE_RNREPO=true`) | 6 min 11 s | 540 | app, expo-modules-core, gesture-handler, reanimated, screens, worklets |
+| RNRepo enabled | **2 min 25 s** | 243 | app, expo-modules-core |
+
+Prebuilds used: react-native-screens 4.26.2, react-native-reanimated 4.5.1,
+react-native-worklets 0.10.1, react-native-gesture-handler 2.32.0,
+react-native-safe-area-context 5.7.0, @react-native-community/netinfo 12.0.1,
+@react-native-masked-view/masked-view 0.3.2. Built from source (no prebuild published):
+expo, expo-modules-core, expo-constants, @expo/log-box. expo-sqlite and expo-image are Expo
+packages the plugin skips by design, and @shopify/flash-list v2 has no native code. The
+resulting APK installs and runs identically (list, search, detail, gallery verified on the
+emulator). Two notes for whoever builds next: run app-scoped tasks (`:app:assembleRelease`),
+because a bare `./gradlew assembleRelease` still compiles every library subproject whether
+or not the app links it; and RNRepo only affects native builds, so the Expo Go dev loop and
+the CI jobs (which run in Expo Go) are unchanged.

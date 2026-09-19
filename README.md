@@ -14,7 +14,9 @@ npm run ios        # or: npm run android
 ```
 
 `npm run ios` / `npm run android` start the Metro dev server and open the app in the iOS
-Simulator / Android emulator. To run on a physical phone instead, `npx expo start` and scan
+Simulator / Android emulator through Expo Go. For a native build (`npx expo run:android`),
+RNRepo prebuilt artifacts are configured and cut the Android build to about a third of the
+from-source time (details in [docs/DECISIONS.md](docs/DECISIONS.md#9-rnrepo-prebuilt-native-artifacts)). To run on a physical phone instead, `npx expo start` and scan
 the QR code with Expo Go.
 
 **Environment.** The only variable is `EXPO_PUBLIC_DOG_API_BASE_URL`, which defaults to

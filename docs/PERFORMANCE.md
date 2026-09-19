@@ -35,6 +35,13 @@ The scroll peak is therefore an upper bound. Screenshot: `screenshots/08-memory-
 In Expo Go the Hermes heap alone was 31–39 MB; the Expo Go process figure (322–478 MB)
 includes the Go shell and dev tooling and is not representative.
 
+## Native build time
+
+RNRepo prebuilt artifacts (see DECISIONS.md §9) cut the Android release build from
+**6 min 11 s to 2 min 25 s** on this machine (warm caches, clean `android/`, app-scoped task),
+by downloading prebuilt `.aar`s for screens, reanimated, worklets, gesture-handler,
+safe-area-context, netinfo and masked-view instead of compiling them.
+
 ## Bundle size
 
 `npx expo export --platform ios --platform android` (production, Hermes bytecode):
