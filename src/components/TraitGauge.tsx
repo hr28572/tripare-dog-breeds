@@ -26,6 +26,7 @@ export function TraitGauge({ traitKey, label, value, low, high }: TraitGaugeProp
   return (
     <View
       style={styles.container}
+      testID={`trait-gauge-${traitKey}`}
       accessible
       accessibilityRole="progressbar"
       accessibilityLabel={`${label}: ${valueLabel}`}

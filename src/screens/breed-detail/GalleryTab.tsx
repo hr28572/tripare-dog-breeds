@@ -57,6 +57,7 @@ export function GalleryTab({ images }: { images: BreedImage[] }) {
           <CachedImage
             source={{ id: item.id, url: item.url, variant: item.variant, localUri: item.localUri, cachedLocally: item.cachedLocally }}
             cacheOnDemand
+            testID={`gallery-image-${index}`}
             style={[styles.image, { width: imageWidth, height: imageWidth * 0.75 }]}
           />
         </Pressable>

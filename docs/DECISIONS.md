@@ -129,3 +129,19 @@ development bundle, with a 2 ms list query (see PERFORMANCE.md).
 - **In-app perf marks.** A 60-line recorder times sync, list queries and time-to-first-row and
   lists them on the Settings screen in dev builds, so on-device numbers can be read without a
   profiler attached.
+
+## 8. End-to-end tests with Maestro, not Detox
+
+The app runs in Expo Go (managed workflow). Detox needs a custom dev client or a native
+build with its test runner compiled in; Maestro drives whatever app is installed through the
+platform's accessibility layer, so it works against Expo Go as-is. The flow in
+`e2e/breed-search-flow.yaml` opens the project via `openLink: exp://…`, waits for the first
+sync, then walks search → filter → detail → Traits → Gallery, asserting on visible text plus
+two `testID`s (`trait-gauge-*`, `gallery-image-*`).
+
+Three Expo-Go-specific gotchas are encoded in the flow: the Android package id is
+`host.exp.exponent` (iOS is `host.exp.Exponent`); Expo Go opens its developer menu the first
+time a project loads on Android, so the flow presses back when that sheet is visible; and
+Maestro's `hideKeyboard` is a back press on Android, which leaves the project, so the flow
+never calls it. It was run on a Pixel 7 API 35 emulator with Expo Go 57.0.9; the flow passes
+in about a minute once breeds are cached.

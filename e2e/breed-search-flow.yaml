@@ -1,0 +1,80 @@
+# Maestro E2E: launch in Expo Go → search → filter → detail → Traits → Gallery.
+#
+# Run (Android emulator, Metro on the host's port 8081):
+#   npx expo start --port 8081          # in another terminal
+#   maestro test e2e/breed-search-flow.yaml
+#
+# Expo Go must be installed on the device (`npx expo start --android` installs it).
+# Override the dev-server URL for a different host/port or an iOS simulator:
+#   maestro test -e EXPO_URL=exp://127.0.0.1:8081 e2e/breed-search-flow.yaml
+# Expo Go's Android package id (iOS uses host.exp.Exponent).
+appId: host.exp.exponent
+env:
+  EXPO_URL: exp://10.0.2.2:8081
+---
+- launchApp
+- openLink: ${EXPO_URL}
+
+# Expo Go may show a one-time prompt, and on Android it opens its developer menu the
+# first time a project loads. Dismiss both if present.
+- tapOn:
+    text: "Continue"
+    optional: true
+- extendedWaitUntil:
+    visible: "Breeds"
+    timeout: 60000
+- runFlow:
+    when:
+      visible: "Toggle performance monitor"
+    commands:
+      - back
+
+# The list is served from SQLite; wait for the first sync on a fresh install.
+- extendedWaitUntil:
+    visible: "Search breeds"
+    timeout: 60000
+- extendedWaitUntil:
+    visible: "FOUNDATION STOCK SERVICE"
+    timeout: 90000
+
+# Search for a specific breed
+# No hideKeyboard here: on Android Maestro implements it as a back press, which in
+# Expo Go leaves the project. The rows asserted below sit above the keyboard.
+- tapOn: "Search breeds"
+- inputText: "affen"
+- assertVisible: "Affenpinscher"
+
+# Apply a filter (size band chip) — the result count updates and the badge appears
+- tapOn: "Small"
+- assertVisible: "Filters · 1"
+- assertVisible: "Affenpinscher"
+
+# Open the detail screen
+- tapOn: "Affenpinscher"
+- assertVisible: "Overview"
+- assertVisible: "Also known as Monkey Terrier, Affen, Diablotin Moustachu"
+
+# Traits tab renders the gauges
+- tapOn: "Traits"
+- assertVisible: "Energy"
+- assertVisible: "Trainability"
+- assertVisible:
+    id: "trait-gauge-energy"
+# The eleventh gauge (exercise, in minutes) is below the fold
+- scrollUntilVisible:
+    element: "Daily exercise"
+    direction: DOWN
+- assertVisible: "Daily exercise"
+- assertVisible: "Temperament"
+- scrollUntilVisible:
+    element: "Gallery"
+    direction: UP
+
+# Gallery tab shows an image with attribution
+- tapOn: "Gallery"
+- extendedWaitUntil:
+    visible:
+      id: "gallery-image-0"
+    timeout: 30000
+- assertVisible: "1 / 9"
+- assertVisible: "© Futurebreak · CC0 · wikimedia commons"

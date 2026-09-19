@@ -33,7 +33,24 @@ npm test -- perf    # data-layer benchmark, prints medians
 npm run typecheck   # tsc --noEmit
 npm run lint        # expo lint
 npm run db:generate # drizzle-kit generate, after editing src/db/schema.ts
+npm run e2e         # Maestro end-to-end flow (see below)
 ```
+
+### End-to-end test (Maestro)
+
+Maestro was chosen over Detox because the app runs in Expo Go: Maestro drives the UI of any
+installed app, so no custom dev client or native build is needed.
+
+```bash
+curl -Ls "https://get.maestro.mobile.dev" | bash     # one-time install (needs Java 17+)
+npx expo start --android                              # Metro on :8081, installs Expo Go on the emulator
+maestro test e2e/breed-search-flow.yaml               # or: npm run e2e
+```
+
+The flow (`e2e/breed-search-flow.yaml`) opens the project in Expo Go, waits for the first
+sync, searches for a breed, applies a size filter, opens the detail screen, and verifies that
+the Traits tab renders gauges and the Gallery tab shows an image with attribution. It targets
+an Android emulator by default (`exp://10.0.2.2:8081`); pass `-e EXPO_URL=…` for another host.
 
 ## Architecture overview
 
@@ -168,4 +185,5 @@ src/
 ├── types/                  API and domain types
 └── __tests__/              unit, component and SQLite integration tests (+ fixtures)
 docs/                       ARCHITECTURE.md, DECISIONS.md, PERFORMANCE.md, screenshots/
+e2e/                        Maestro flow (breed-search-flow.yaml)
 ```

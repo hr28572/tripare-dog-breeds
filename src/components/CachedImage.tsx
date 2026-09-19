@@ -32,6 +32,7 @@ export function CachedImage({
   placeholderLabel = OFFLINE_PLACEHOLDER_LABEL,
   compactPlaceholder = false,
   style,
+  testID,
   ...rest
 }: CachedImageProps) {
   const theme = useTheme();
@@ -49,7 +50,7 @@ export function CachedImage({
         style={[styles.placeholder, { backgroundColor: theme.backgroundSelected }, style]}
         accessibilityRole="image"
         accessibilityLabel={placeholderLabel}
-        testID="image-placeholder">
+        testID={testID ?? 'image-placeholder'}>
         <Ionicons name={isOnline ? 'image-outline' : 'cloud-offline-outline'} size={compactPlaceholder ? 20 : 32} color={theme.textSecondary} />
         {!compactPlaceholder && (
           <ThemedText type="small" themeColor="textSecondary" style={styles.placeholderText}>
@@ -67,6 +68,7 @@ export function CachedImage({
         if (source && uri !== source.url) onError();
         else setFailedFor(source?.id ?? null);
       }}
+      testID={testID}
       recyclingKey={source?.id ?? undefined}
       cachePolicy="memory-disk"
       contentFit="cover"

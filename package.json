@@ -57,7 +57,8 @@
     "lint": "expo lint",
     "db:generate": "drizzle-kit generate",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "e2e": "maestro test e2e/breed-search-flow.yaml"
   },
   "private": true,
   "jest": {
