@@ -25,7 +25,14 @@ export function FilterBar({ onOpenSheet, resultCount, groupCount }: FilterBarPro
 
   return (
     <View style={styles.container}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+      {/* keyboardShouldPersistTaps: with the search keyboard open, a chip tap should
+          both dismiss the keyboard and toggle the chip, not be swallowed by the
+          ScrollView (Android's default), which would make users tap twice. */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.chips}>
         <Pressable
           onPress={onOpenSheet}
           accessibilityRole="button"
