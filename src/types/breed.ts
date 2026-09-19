@@ -6,6 +6,14 @@ export type SizeBand = (typeof SIZE_BANDS)[number];
 export const COAT_LENGTHS = ['hairless', 'short', 'medium', 'long'] as const;
 export type CoatLength = (typeof COAT_LENGTHS)[number];
 
+/**
+ * Coat filter options. The API stores length (hairless/short/medium/long) and type
+ * (wire, double, smooth, curly, …) separately; the brief lists "wire" alongside the
+ * lengths, so the filter exposes it and matches it against coat type.
+ */
+export const COAT_FILTERS = [...COAT_LENGTHS, 'wire'] as const;
+export type CoatFilter = (typeof COAT_FILTERS)[number];
+
 /** The 11 numeric trait scores exposed by the API, in display order. */
 export const TRAIT_KEYS = [
   'energy',

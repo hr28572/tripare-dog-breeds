@@ -16,7 +16,7 @@ import {
   type SyncMeta,
 } from './schema';
 
-import type { CoatLength, ImageVariant, SizeBand, TraitKey } from '@/types/breed';
+import type { CoatFilter, CoatLength, ImageVariant, SizeBand, TraitKey } from '@/types/breed';
 
 export const SYNC_KEY = 'breeds';
 
@@ -180,7 +180,8 @@ export interface ListBreedsFilter {
   search?: string;
   groupIds?: string[];
   sizeBands?: SizeBand[];
-  coatLengths?: CoatLength[];
+  /** coat lengths, plus 'wire' which matches coat_type = 'wire' */
+  coatLengths?: CoatFilter[];
   hypoallergenic?: boolean;
   /** every threshold must hold (AND) */
   traitThresholds?: TraitThresholdFilter[];
@@ -196,7 +197,13 @@ function breedConditions(filter: ListBreedsFilter): SQL | undefined {
   }
   if (filter.groupIds && filter.groupIds.length > 0) conditions.push(inArray(breeds.groupId, filter.groupIds));
   if (filter.sizeBands && filter.sizeBands.length > 0) conditions.push(inArray(breeds.sizeBand, filter.sizeBands));
-  if (filter.coatLengths && filter.coatLengths.length > 0) conditions.push(inArray(breeds.coatLength, filter.coatLengths));
+  if (filter.coatLengths && filter.coatLengths.length > 0) {
+    const lengths = filter.coatLengths.filter((c): c is CoatLength => c !== 'wire');
+    const parts: SQL[] = [];
+    if (lengths.length > 0) parts.push(inArray(breeds.coatLength, lengths));
+    if (filter.coatLengths.includes('wire')) parts.push(eq(breeds.coatType, 'wire'));
+    conditions.push(or(...parts)!);
+  }
   if (filter.hypoallergenic !== undefined) conditions.push(eq(breeds.hypoallergenic, filter.hypoallergenic));
   for (const t of filter.traitThresholds ?? []) conditions.push(gte(breeds[t.trait], t.min));
   return conditions.length > 0 ? and(...conditions) : undefined;

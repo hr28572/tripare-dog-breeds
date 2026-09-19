@@ -11,7 +11,7 @@ import { TRAIT_META } from '@/constants/traits';
 import type { Group } from '@/db/schema';
 import { useTheme } from '@/hooks/use-theme';
 import { countActiveFilters, useFilterStore } from '@/stores/filterStore';
-import { COAT_LENGTHS, SIZE_BANDS } from '@/types/breed';
+import { COAT_FILTERS, SIZE_BANDS } from '@/types/breed';
 import { capitalize } from '@/utils/format';
 
 interface FilterSheetProps {
@@ -97,9 +97,9 @@ export function FilterSheet({ visible, onClose, groups }: FilterSheetProps) {
               </View>
             </Section>
 
-            <Section title="Coat length">
+            <Section title="Coat">
               <View style={styles.wrap}>
-                {COAT_LENGTHS.map((length) => (
+                {COAT_FILTERS.map((length) => (
                   <Chip
                     key={length}
                     label={capitalize(length)}
@@ -112,7 +112,7 @@ export function FilterSheet({ visible, onClose, groups }: FilterSheetProps) {
               </View>
             </Section>
 
-            <Section title="Coat">
+            <Section title="Allergies">
               <View style={styles.switchRow}>
                 <ThemedText>Hypoallergenic only</ThemedText>
                 <Switch

@@ -115,6 +115,15 @@ development bundle, with a 2 ms list query (see PERFORMANCE.md).
 
 ## 7. Smaller decisions
 
+- **"Wire" in the coat filter.** The brief lists coat options as short/medium/long/wire, but
+  the API stores length (hairless/short/medium/long) and type (wire, double, smooth, curly, …)
+  as separate fields. The filter exposes all four lengths plus "wire", and "wire" matches
+  `coat_type = 'wire'` (35 breeds) while the others match `coat_length`; options combine with
+  OR within the coat group, AND across groups like every other filter.
+- **Error boundaries per feature area.** The root layout, the tabs (list/settings) layout and
+  the breed detail layout each export an Expo Router `ErrorBoundary`, so a render error in
+  one area shows a retry screen in place without unmounting the rest of the app.
+
 - **Routes in root `app/`, logic in `src/`.** The SDK 57 template puts routes in `src/app/`;
   they were moved to match the required layout and keep route files as thin re-exports.
 - **Detail tabs are nested routes.** Overview/Traits/Gallery are `expo-router/ui` headless

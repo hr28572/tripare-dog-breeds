@@ -10,7 +10,7 @@ export const DB_NAME = 'tripare.db';
  * Driver-agnostic handle used by the repository and sync code, so the same
  * code runs against expo-sqlite in the app and better-sqlite3 in Node tests.
  */
-export type AppDb = BaseSQLiteDatabase<'sync', any, typeof schema>;
+export type AppDb = BaseSQLiteDatabase<'sync', unknown, typeof schema>;
 
 export const sqlite = openDatabaseSync(DB_NAME, { enableChangeListener: true });
 export const db = drizzle(sqlite, { schema });

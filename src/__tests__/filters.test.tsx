@@ -42,8 +42,8 @@ describe('<FilterSheet />', () => {
     expect(useFilterStore.getState().activeFilters.groupIds).toEqual(['g2']);
 
     await fireEvent.press(screen.getByText('Long'));
-    await fireEvent.press(screen.getByText('Hairless'));
-    expect(useFilterStore.getState().activeFilters.coatLengths).toEqual(['long', 'hairless']);
+    await fireEvent.press(screen.getByText('Wire'));
+    expect(useFilterStore.getState().activeFilters.coatLengths).toEqual(['long', 'wire']);
 
     await fireEvent(screen.getByLabelText('Hypoallergenic only'), 'valueChange', true);
     expect(useFilterStore.getState().activeFilters.hypoallergenicOnly).toBe(true);

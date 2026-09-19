@@ -213,6 +213,14 @@ describe('list filters (real SQLite)', () => {
     expect(hairless.length).toBe(4);
     expect(hairless.every((r) => r.coatLength === 'hairless')).toBe(true);
 
+    // 'wire' is a coat TYPE in the API; the filter exposes it next to the lengths.
+    const wire = listBreedRows(db, { coatLengths: ['wire'] });
+    expect(wire.length).toBe(35);
+    expect(wire.every((r) => r.coatType === 'wire')).toBe(true);
+    const shortOrWire = listBreedRows(db, { coatLengths: ['short', 'wire'] });
+    expect(shortOrWire.length).toBeGreaterThan(wire.length);
+    expect(shortOrWire.every((r) => r.coatLength === 'short' || r.coatType === 'wire')).toBe(true);
+
     const kidFriendly = listBreedRows(db, { traitThresholds: [{ trait: 'goodWithChildren', min: 5 }] });
     expect(kidFriendly.length).toBeGreaterThan(0);
     expect(kidFriendly.every((r) => (r.goodWithChildren ?? 0) >= 5)).toBe(true);

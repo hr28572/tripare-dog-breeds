@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { CoatLength, SizeBand, TraitKey } from '@/types/breed';
+import type { CoatFilter, SizeBand, TraitKey } from '@/types/breed';
 
 export interface TraitThreshold {
   trait: TraitKey;
@@ -11,7 +11,7 @@ export interface TraitThreshold {
 export interface ActiveFilters {
   groupIds: string[];
   sizeBands: SizeBand[];
-  coatLengths: CoatLength[];
+  coatLengths: CoatFilter[];
   hypoallergenicOnly: boolean;
   traitThresholds: TraitThreshold[];
 }
@@ -35,7 +35,7 @@ export interface FilterState {
   setSearchQuery: (query: string) => void;
   toggleGroup: (groupId: string) => void;
   toggleSizeBand: (band: SizeBand) => void;
-  toggleCoatLength: (length: CoatLength) => void;
+  toggleCoatLength: (length: CoatFilter) => void;
   setHypoallergenicOnly: (value: boolean) => void;
   toggleTrait: (trait: TraitKey) => void;
   /** Applies one minimum to every selected trait threshold. */

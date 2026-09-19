@@ -1,7 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
+import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import { useTheme } from '@/hooks/use-theme';
+
+// Error boundary for the list/settings feature area; the detail route has its own.
+export { RouteErrorBoundary as ErrorBoundary };
 
 export default function TabsLayout() {
   const theme = useTheme();
