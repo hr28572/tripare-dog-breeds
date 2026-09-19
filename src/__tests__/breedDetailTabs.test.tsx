@@ -34,8 +34,8 @@ describe('<OverviewTab />', () => {
 describe('<TraitsTab />', () => {
   it('renders one gauge per trait with accessible values, plus temperament', async () => {
     await render(<TraitsTab breed={makeBreed()} />);
-    expect(screen.getByLabelText('Energy: 3/5')).toBeTruthy();
-    expect(screen.getByLabelText('Daily exercise: 30 min/day')).toBeTruthy();
+    expect(screen.getByLabelText('Energy, 3 out of 5, from calm to very active')).toBeTruthy();
+    expect(screen.getByLabelText('Daily exercise, 30 minutes per day')).toBeTruthy();
     expect(screen.getAllByRole('progressbar')).toHaveLength(11);
     expect(screen.getByText('playful')).toBeTruthy();
   });
@@ -48,7 +48,7 @@ describe('<TraitsTab />', () => {
     });
     await render(<TraitsTab breed={noTraits} />);
     expect(screen.getByText(/No trait scores are available/)).toBeTruthy();
-    expect(screen.getByLabelText('Energy: No data')).toBeTruthy();
+    expect(screen.getByLabelText('Energy, no data, from calm to very active')).toBeTruthy();
   });
 });
 
@@ -63,8 +63,10 @@ describe('<GalleryTab />', () => {
     await render(<GalleryTab images={images} />);
     // FlatList virtualises: only the first page is mounted before layout, but the pager knows both.
     expect(screen.getByLabelText('Photo 1 of 2')).toBeTruthy();
+    expect(screen.getByLabelText('Showing photo 1 of 2')).toBeTruthy();
     expect(screen.getByText('© Ada · CC BY 2.0 · wikimedia commons')).toBeTruthy();
-    expect(screen.getByText('1 / 2')).toBeTruthy();
+    expect(screen.getByLabelText('Photo 1 of 2')).toBeTruthy();
+    expect(screen.getByLabelText('Showing photo 1 of 2')).toBeTruthy();
 
     await fireEvent.press(screen.getByLabelText('Photo by Ada, opens full screen'));
     expect(screen.getByLabelText('Breed photo by Ada')).toBeTruthy();
@@ -75,7 +77,7 @@ describe('<GalleryTab />', () => {
       makeImage({ id: `i${i}:medium`, imageId: `i${i}`, position: i, url: `https://img/${i}` }),
     );
     await render(<GalleryTab images={images} />);
-    expect(screen.getByText('1 / 9')).toBeTruthy();
+    expect(screen.getByLabelText('Showing photo 1 of 9')).toBeTruthy();
     expect(attributionText(makeImage({ author: null, license: null, source: null }))).toBe('');
   });
 

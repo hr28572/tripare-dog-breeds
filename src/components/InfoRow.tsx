@@ -14,7 +14,7 @@ export function InfoRow({ label, value }: InfoRowProps) {
   const theme = useTheme();
   if (!value || value === '—') return null;
   return (
-    <View style={[styles.row, { borderBottomColor: theme.border }]}>
+    <View style={[styles.row, { borderBottomColor: theme.border }]} accessible accessibilityLabel={`${label}: ${value}`}>
       <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
         {label}
       </ThemedText>

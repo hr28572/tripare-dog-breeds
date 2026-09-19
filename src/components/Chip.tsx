@@ -11,10 +11,11 @@ interface ChipProps {
   color?: string;
   style?: ViewStyle;
   accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 /** Pill used for filters and tags. Static (no onPress) or toggleable. */
-export function Chip({ label, selected = false, onPress, color, style, accessibilityLabel }: ChipProps) {
+export function Chip({ label, selected = false, onPress, color, style, accessibilityLabel, accessibilityHint }: ChipProps) {
   const theme = useTheme();
   const accent = color ?? theme.tint;
   const body = (
@@ -36,8 +37,10 @@ export function Chip({ label, selected = false, onPress, color, style, accessibi
       accessibilityRole="button"
       accessibilityState={{ selected }}
       accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityHint={accessibilityHint}
       style={({ pressed }) => pressed && styles.pressed}
-      hitSlop={8}>
+      // 48pt tall chip meets both iOS (44pt) and Android (48dp) minimums on its own bounds
+      hitSlop={4}>
       {body}
     </Pressable>
   );
@@ -45,6 +48,8 @@ export function Chip({ label, selected = false, onPress, color, style, accessibi
 
 const styles = StyleSheet.create({
   chip: {
+    minHeight: 48,
+    justifyContent: 'center',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one + 2,
     borderRadius: 999,

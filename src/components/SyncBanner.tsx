@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -50,9 +50,18 @@ export function SyncBanner() {
   const status = useSyncStatus();
   const now = useClock();
   const theme = useTheme();
-  if (!status.hydrated) return null;
-
   const { text, tone, canRetry, icon } = describeSyncStatus(status, now);
+
+  // Android reads the live region; iOS needs an explicit announcement when the status changes.
+  // Keyed on status, not the "X min ago" text, so the clock tick does not re-announce.
+  const statusKey = `${status.hydrated}|${status.isSyncing}|${status.isOnline}|${status.lastStatus}|${status.lastSyncedAt}`;
+  useEffect(() => {
+    if (!status.hydrated) return;
+    AccessibilityInfo.announceForAccessibility(text);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusKey]);
+
+  if (!status.hydrated) return null;
   const color =
     tone === 'danger' ? theme.danger : tone === 'warning' ? theme.warning : tone === 'info' ? theme.tint : theme.textSecondary;
 
@@ -64,18 +73,24 @@ export function SyncBanner() {
       accessibilityLiveRegion="polite"
       style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>
       <View style={styles.row}>
-        {status.isSyncing ? <ActivityIndicator size="small" color={color} /> : <Ionicons name={icon} size={16} color={color} />}
+        {status.isSyncing ? (
+          <ActivityIndicator size="small" color={color} accessibilityElementsHidden importantForAccessibility="no" />
+        ) : (
+          <Ionicons name={icon} size={16} color={color} accessibilityElementsHidden importantForAccessibility="no" />
+        )}
         <ThemedText type="small" style={[styles.text, { color }]} numberOfLines={2}>
           {text}
         </ThemedText>
-        {canRetry && !status.isSyncing && <Ionicons name="refresh" size={16} color={theme.textSecondary} />}
+        {canRetry && !status.isSyncing && (
+          <Ionicons name="refresh" size={16} color={theme.textSecondary} accessibilityElementsHidden importantForAccessibility="no" />
+        )}
       </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  banner: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.two },
+  banner: { minHeight: 48, justifyContent: 'center', paddingHorizontal: Spacing.three, paddingVertical: Spacing.two },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   text: { flex: 1 },
 });

@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
   section: { gap: Spacing.two },
   sectionTitle: { fontSize: 12, letterSpacing: 0.6 },
   button: {
+    minHeight: 48,
     flexDirection: 'row',
     gap: Spacing.two,
     alignItems: 'center',

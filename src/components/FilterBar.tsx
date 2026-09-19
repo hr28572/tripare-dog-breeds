@@ -31,12 +31,13 @@ export function FilterBar({ onOpenSheet, resultCount, groupCount }: FilterBarPro
           accessibilityRole="button"
           accessibilityLabel={`Filters, ${active} active`}
           accessibilityHint="Opens group, size, coat and trait filters"
+          hitSlop={4}
           style={({ pressed }) => [
             styles.filterButton,
             { backgroundColor: active > 0 ? theme.tint : theme.backgroundElement, borderColor: theme.border },
             pressed && styles.pressed,
           ]}>
-          <Ionicons name="options" size={16} color={active > 0 ? theme.onTint : theme.text} />
+          <Ionicons name="options" size={16} color={active > 0 ? theme.onTint : theme.text} accessibilityElementsHidden importantForAccessibility="no" />
           <ThemedText type="small" style={{ color: active > 0 ? theme.onTint : theme.text }}>
             {active > 0 ? `Filters · ${active}` : 'Filters'}
           </ThemedText>
@@ -48,11 +49,18 @@ export function FilterBar({ onOpenSheet, resultCount, groupCount }: FilterBarPro
             color={SizeBandColors[band]}
             selected={activeFilters.sizeBands.includes(band)}
             onPress={() => toggleSizeBand(band)}
+            accessibilityLabel={`${capitalize(band)} size`}
+            accessibilityHint="Filters the list by size"
           />
         ))}
         {active > 0 && <Chip label="Clear all" onPress={clearAll} accessibilityLabel="Clear all filters" />}
       </ScrollView>
-      <ThemedText type="small" themeColor="textSecondary" style={styles.count}>
+      <ThemedText
+        type="small"
+        themeColor="textSecondary"
+        style={styles.count}
+        accessibilityLiveRegion="polite"
+        accessibilityLabel={`${resultCount} ${resultCount === 1 ? 'breed' : 'breeds'} in ${groupCount} ${groupCount === 1 ? 'group' : 'groups'}`}>
         {resultCount} {resultCount === 1 ? 'breed' : 'breeds'} · {groupCount} {groupCount === 1 ? 'group' : 'groups'}
       </ThemedText>
     </View>
@@ -63,6 +71,7 @@ const styles = StyleSheet.create({
   container: { gap: Spacing.one },
   chips: { gap: Spacing.two, paddingHorizontal: Spacing.three, alignItems: 'center' },
   filterButton: {
+    minHeight: 48,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.one,

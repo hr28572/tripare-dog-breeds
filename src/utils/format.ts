@@ -22,6 +22,15 @@ export function formatRange(min: number | null, max: number | null, unit: string
   return '—';
 }
 
+/** Screen-reader friendly range: "4 to 6 kilograms", never an en dash. */
+export function spokenRange(min: number | null, max: number | null, unit: string): string {
+  const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+  if (min !== null && max !== null) return min === max ? `${fmt(min)} ${unit}` : `${fmt(min)} to ${fmt(max)} ${unit}`;
+  if (max !== null) return `${fmt(max)} ${unit}`;
+  if (min !== null) return `${fmt(min)} ${unit}`;
+  return 'unknown';
+}
+
 export function formatLifeSpan(min: number | null, max: number | null): string {
   const r = formatRange(min, max, 'years');
   return r === '—' ? r : r.replace(/^(\d+) years$/, '$1 years');

@@ -65,6 +65,7 @@ export function GalleryTab({ images }: { images: BreedImage[] }) {
           onPress={() => item.sourceUrl && WebBrowser.openBrowserAsync(item.sourceUrl)}
           disabled={!item.sourceUrl}
           accessibilityRole="link"
+          accessibilityLabel={`${attributionText(item) || 'No attribution provided'}${item.sourceUrl ? '. Opens the source page' : ''}`}
           style={styles.caption}>
           <ThemedText type="small" themeColor="textSecondary" numberOfLines={2} style={styles.captionText}>
             {attributionText(item) || 'No attribution provided'}
@@ -99,11 +100,11 @@ export function GalleryTab({ images }: { images: BreedImage[] }) {
         windowSize={3}
         getItemLayout={(_, index) => ({ length: pageWidth, offset: pageWidth * index, index })}
       />
-      <View style={styles.indicator} accessibilityLabel={`Page ${page + 1} of ${pages.length}`}>
+      <View style={styles.indicator} accessible accessibilityRole="text" accessibilityLiveRegion="polite" accessibilityLabel={`Showing photo ${page + 1} of ${pages.length}`}>
         {pages.map((p, i) => (
           <View key={p.id} style={[styles.dot, { backgroundColor: i === page ? theme.tint : theme.backgroundSelected }]} />
         ))}
-        <ThemedText type="small" themeColor="textSecondary" style={styles.counter}>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.counter} accessibilityElementsHidden importantForAccessibility="no">
           {page + 1} / {pages.length}
         </ThemedText>
       </View>
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
   pagePressable: { paddingHorizontal: Spacing.three },
   pressed: { opacity: 0.85 },
   image: { borderRadius: 16 },
-  caption: { paddingHorizontal: Spacing.three, paddingTop: Spacing.two },
+  caption: { minHeight: 48, justifyContent: 'center', paddingHorizontal: Spacing.three, paddingTop: Spacing.two },
   captionText: { fontSize: 12, lineHeight: 16 },
   indicator: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: Spacing.three },
   dot: { width: 6, height: 6, borderRadius: 3 },

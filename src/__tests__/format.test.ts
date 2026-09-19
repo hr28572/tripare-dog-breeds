@@ -1,4 +1,4 @@
-import { formatLifeSpan, formatRange, formatRelativeTime, joinNonEmpty } from '@/utils/format';
+import { formatLifeSpan, formatRange, formatRelativeTime, joinNonEmpty, spokenRange } from '@/utils/format';
 
 const NOW = 1_700_000_000_000;
 
@@ -27,5 +27,13 @@ describe('formatRange / formatLifeSpan', () => {
 
   it('joins non-empty parts', () => {
     expect(joinNonEmpty(['Toy', null, '', 'Germany'])).toBe('Toy · Germany');
+  });
+});
+
+describe('spokenRange', () => {
+  it('uses words instead of dashes', () => {
+    expect(spokenRange(4, 6, 'kilograms')).toBe('4 to 6 kilograms');
+    expect(spokenRange(6, 6, 'kilograms')).toBe('6 kilograms');
+    expect(spokenRange(null, null, 'kilograms')).toBe('unknown');
   });
 });

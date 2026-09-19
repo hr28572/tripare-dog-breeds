@@ -15,7 +15,7 @@ describe('<FilterBar />', () => {
   it('toggles size bands, shows the count badge and clears all', async () => {
     const onOpen = jest.fn();
     await render(<FilterBar onOpenSheet={onOpen} resultCount={12} groupCount={3} />);
-    expect(screen.getByText('12 breeds · 3 groups')).toBeTruthy();
+    expect(screen.getByLabelText('12 breeds in 3 groups')).toBeTruthy();
 
     await fireEvent.press(screen.getByText('Small'));
     await fireEvent.press(screen.getByText('Giant'));

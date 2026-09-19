@@ -37,7 +37,7 @@ describe('<BreedListScreen />', () => {
     await render(<BreedListScreen />);
     expect(screen.getByText('3 breeds · 2 groups')).toBeTruthy();
     expect(screen.getByLabelText('Toy, 2 breeds')).toBeTruthy();
-    expect(screen.getByLabelText('Hound Group, 1 breeds')).toBeTruthy();
+    expect(screen.getByLabelText('Hound Group, 1 breed')).toBeTruthy();
     await fireEvent.press(screen.getByText('Pug'));
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/breed/[id]', params: { id: 'b2' } });
   });

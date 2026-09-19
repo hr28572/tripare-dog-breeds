@@ -46,13 +46,22 @@ export function FilterSheet({ visible, onClose, groups }: FilterSheetProps) {
       <ThemedView style={styles.flex}>
         <SafeAreaView edges={['top', 'bottom']} style={styles.flex}>
           <View style={[styles.header, { borderBottomColor: theme.border }]}>
-            <Pressable onPress={f.clearAll} disabled={count === 0} accessibilityRole="button" accessibilityLabel="Clear all filters" hitSlop={8}>
+            <Pressable
+              onPress={f.clearAll}
+              disabled={count === 0}
+              accessibilityRole="button"
+              accessibilityLabel="Clear all filters"
+              accessibilityState={{ disabled: count === 0 }}
+              style={styles.headerButton}
+              hitSlop={4}>
               <ThemedText type="small" themeColor={count === 0 ? 'textSecondary' : 'tint'}>
                 Clear all
               </ThemedText>
             </Pressable>
-            <ThemedText type="smallBold">{count > 0 ? `Filters (${count})` : 'Filters'}</ThemedText>
-            <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" hitSlop={8}>
+            <ThemedText type="smallBold" accessibilityRole="header">
+              {count > 0 ? `Filters (${count})` : 'Filters'}
+            </ThemedText>
+            <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Close filters" style={styles.headerButton} hitSlop={4}>
               <Ionicons name="close" size={22} color={theme.text} />
             </Pressable>
           </View>
@@ -61,7 +70,13 @@ export function FilterSheet({ visible, onClose, groups }: FilterSheetProps) {
             <Section title="Group">
               <View style={styles.wrap}>
                 {groups.map((g) => (
-                  <Chip key={g.id} label={g.name} selected={f.active.groupIds.includes(g.id)} onPress={() => f.toggleGroup(g.id)} />
+                  <Chip
+                    key={g.id}
+                    label={g.name}
+                    selected={f.active.groupIds.includes(g.id)}
+                    onPress={() => f.toggleGroup(g.id)}
+                    accessibilityHint="Filters the list by breed group"
+                  />
                 ))}
               </View>
             </Section>
@@ -75,6 +90,8 @@ export function FilterSheet({ visible, onClose, groups }: FilterSheetProps) {
                     color={SizeBandColors[band]}
                     selected={f.active.sizeBands.includes(band)}
                     onPress={() => f.toggleSizeBand(band)}
+                    accessibilityLabel={`${capitalize(band)} size`}
+                    accessibilityHint="Filters the list by size"
                   />
                 ))}
               </View>
@@ -88,6 +105,8 @@ export function FilterSheet({ visible, onClose, groups }: FilterSheetProps) {
                     label={capitalize(length)}
                     selected={f.active.coatLengths.includes(length)}
                     onPress={() => f.toggleCoatLength(length)}
+                    accessibilityLabel={`${capitalize(length)} coat`}
+                    accessibilityHint="Filters the list by coat length"
                   />
                 ))}
               </View>
@@ -116,6 +135,8 @@ export function FilterSheet({ visible, onClose, groups }: FilterSheetProps) {
                     label={t.label}
                     selected={f.active.traitThresholds.some((x) => x.trait === t.key)}
                     onPress={() => f.toggleTrait(t.key)}
+                    accessibilityLabel={`${t.label} trait`}
+                    accessibilityHint={`Only show breeds scoring at least ${traitMin} out of 5`}
                   />
                 ))}
               </View>
@@ -130,6 +151,7 @@ export function FilterSheet({ visible, onClose, groups }: FilterSheetProps) {
                         selected={traitMin === min}
                         onPress={() => f.setTraitMin(min)}
                         accessibilityLabel={`Minimum score ${min}`}
+                        accessibilityHint="Applies to every selected trait"
                       />
                     ))}
                   </View>
@@ -157,7 +179,7 @@ export function FilterSheet({ visible, onClose, groups }: FilterSheetProps) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={styles.section}>
-      <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionTitle}>
+      <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionTitle} accessibilityRole="header">
         {title.toUpperCase()}
       </ThemedText>
       {children}
@@ -175,6 +197,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
+  headerButton: { minHeight: 48, minWidth: 48, justifyContent: 'center', alignItems: 'center' },
   content: { padding: Spacing.three, gap: Spacing.four },
   section: { gap: Spacing.two },
   sectionTitle: { fontSize: 12, letterSpacing: 0.6 },

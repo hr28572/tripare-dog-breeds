@@ -18,7 +18,7 @@ export function SectionHeader({ title, count }: SectionHeaderProps) {
     <View
       style={[styles.header, { backgroundColor: theme.backgroundElement, borderBottomColor: theme.border }]}
       accessibilityRole="header"
-      accessibilityLabel={`${title}, ${count} breeds`}>
+      accessibilityLabel={`${title}, ${count} ${count === 1 ? 'breed' : 'breeds'}`}>
       <ThemedText type="smallBold" style={styles.title}>
         {title}
       </ThemedText>

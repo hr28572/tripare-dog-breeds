@@ -16,6 +16,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Breeds',
+          tabBarAccessibilityLabel: 'Breeds',
           tabBarIcon: ({ color, size }) => <Ionicons name="paw" color={color} size={size} />,
         }}
       />
@@ -23,6 +24,7 @@ export default function TabsLayout() {
         name="settings"
         options={{
           title: 'Settings',
+          tabBarAccessibilityLabel: 'Settings',
           tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" color={color} size={size} />,
         }}
       />

@@ -9,7 +9,7 @@ import { Spacing } from '@/constants/theme';
 import type { BreedListRow } from '@/db/repository';
 import { useTheme } from '@/hooks/use-theme';
 import type { TraitKey } from '@/types/breed';
-import { formatLifeSpan, joinNonEmpty } from '@/utils/format';
+import { capitalize, formatLifeSpan, joinNonEmpty, spokenRange } from '@/utils/format';
 
 /** Measured rendered height (see docs/PERFORMANCE.md); fixed so recycling never re-measures. */
 export const BREED_ROW_HEIGHT = 88;
@@ -35,13 +35,26 @@ function BreedRowInner({ breed, onPress }: BreedRowProps) {
   const subtitle = joinNonEmpty([breed.groupName, formatLifeSpan(breed.lifeMin, breed.lifeMax)]);
   const traits = ROW_TRAITS.filter((t) => breed[t.key] !== null);
   const traitsLabel = traits.map((t) => `${t.label} ${breed[t.key]} of 5`).join(', ');
+  // One sentence per fact so a screen reader pauses between them; no glyphs or dashes.
+  const accessibilityLabel = joinNonEmpty(
+    [
+      breed.name,
+      breed.sizeBand ? `${capitalize(breed.sizeBand)} size` : null,
+      breed.groupName,
+      breed.lifeMin !== null || breed.lifeMax !== null ? `lives ${spokenRange(breed.lifeMin, breed.lifeMax, 'years')}` : null,
+      traitsLabel || null,
+      breed.hypoallergenic ? 'hypoallergenic' : null,
+    ],
+    '. ',
+  );
 
   return (
     <Pressable
       onPress={() => onPress(breed.id)}
       accessible
       accessibilityRole="button"
-      accessibilityLabel={joinNonEmpty([breed.name, breed.sizeBand, subtitle, traitsLabel], ', ')}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint="Opens breed details"
       style={({ pressed }) => [styles.row, { borderBottomColor: theme.border }, pressed && { backgroundColor: theme.backgroundElement }]}>
       <CachedImage source={thumb} style={styles.thumb} />
       <View style={styles.body}>
@@ -54,7 +67,7 @@ function BreedRowInner({ breed, onPress }: BreedRowProps) {
         <View style={styles.badges}>
           <SizeBadge band={breed.sizeBand} />
           {traits.map((t) => (
-            <View key={t.key} style={styles.trait}>
+            <View key={t.key} style={styles.trait} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
               <Ionicons name={t.icon} size={12} color={theme.textSecondary} />
               <ThemedText type="small" themeColor="textSecondary" style={styles.traitText}>
                 {breed[t.key]}

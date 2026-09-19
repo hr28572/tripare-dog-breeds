@@ -161,11 +161,12 @@ uncached photos show a "Not available offline" placeholder rather than a spinner
 
 ## Accessibility
 
-- Every pressable has a role and label; decorative icons are hidden from screen readers.
-- Trait gauges expose `accessibilityValue` (min/max/now) and a spoken label such as "Energy: 3/5".
-- Filter chips have enlarged hit areas; the sync banner is a polite live region.
-- Text scales with system font size; fixed-height list rows cap scaling at 1.4× to avoid clipping.
-- Detail tabs are a `tablist` with selected state; gallery pages announce their position and photographer.
+Screen-reader support was verified against the Android accessibility tree with TalkBack
+running: rows announce as one coherent sentence, filters announce their type and selected
+state, tabs announce "Overview, tab 1 of 3", trait gauges announce name and score, and the
+sync banner is a live region. All tap targets are at least 48 dp. What was tested, what
+works, and the known gaps (including iOS VoiceOver being untested) are in
+[docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 
 ## Project layout
 

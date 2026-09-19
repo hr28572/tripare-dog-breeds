@@ -55,7 +55,7 @@ export function BreedDetailLayout() {
           <View style={styles.header}>
             <View style={styles.titleRow}>
               {/* The list already cached this thumb, so the hero never needs the network. */}
-              <CachedImage source={hero} style={styles.hero} compactPlaceholder />
+              <CachedImage source={hero} style={styles.hero} compactPlaceholder accessibilityLabel={`Photo of ${breed.name}`} />
               <View style={styles.titleBlock}>
                 <ThemedText type="subtitle" style={styles.name} numberOfLines={2}>
                   {breed.name}
@@ -72,15 +72,15 @@ export function BreedDetailLayout() {
               </View>
             </View>
           </View>
-          <TabList style={[styles.tabList, { backgroundColor: theme.backgroundElement }]}>
+          <TabList style={[styles.tabList, { backgroundColor: theme.backgroundElement }]} accessibilityRole="tablist">
             <TabTrigger name="overview" href={base as Href} asChild>
-              <TabButton>Overview</TabButton>
+              <TabButton index={1}>Overview</TabButton>
             </TabTrigger>
             <TabTrigger name="traits" href={`${base}/traits` as Href} asChild>
-              <TabButton>Traits</TabButton>
+              <TabButton index={2}>Traits</TabButton>
             </TabTrigger>
             <TabTrigger name="gallery" href={`${base}/gallery` as Href} asChild>
-              <TabButton>Gallery</TabButton>
+              <TabButton index={3}>Gallery</TabButton>
             </TabTrigger>
           </TabList>
           <TabSlot />
@@ -90,13 +90,16 @@ export function BreedDetailLayout() {
   );
 }
 
-function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
+function TabButton({ children, isFocused, index, ...props }: TabTriggerSlotProps & { index: number }) {
   const theme = useTheme();
   return (
     <Pressable
       {...props}
       accessibilityRole="tab"
       accessibilityState={{ selected: !!isFocused }}
+      accessibilityLabel={`${children}, tab ${index} of 3`}
+      accessibilityHint={isFocused ? undefined : `Shows the ${String(children).toLowerCase()} tab`}
+      hitSlop={4}
       style={[styles.tab, isFocused && { backgroundColor: theme.background, ...styles.tabSelected }]}>
       <ThemedText type={isFocused ? 'smallBold' : 'small'} themeColor={isFocused ? 'text' : 'textSecondary'}>
         {children}
@@ -114,6 +117,6 @@ const styles = StyleSheet.create({
   name: { fontSize: 24, lineHeight: 30 },
   meta: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   tabList: { flexDirection: 'row', padding: 3, borderRadius: 10, marginHorizontal: Spacing.three, marginBottom: Spacing.two },
-  tab: { flex: 1, alignItems: 'center', paddingVertical: Spacing.two - 2, borderRadius: 8 },
+  tab: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.two - 2, borderRadius: 8 },
   tabSelected: { shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
 });

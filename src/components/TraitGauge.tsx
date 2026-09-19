@@ -22,6 +22,8 @@ export function TraitGauge({ traitKey, label, value, low, high }: TraitGaugeProp
   const scale = TRAIT_SCALE[traitKey];
   const isMinutes = traitKey === 'exerciseMinutes';
   const valueLabel = value === null ? 'No data' : isMinutes ? `${value} min/day` : `${value}/${scale.max}`;
+  const spokenValue = value === null ? 'no data' : isMinutes ? `${value} minutes per day` : `${value} out of ${scale.max}`;
+  const spokenLabel = `${label}, ${spokenValue}${!isMinutes && low && high ? `, from ${low.toLowerCase()} to ${high.toLowerCase()}` : ''}`;
 
   return (
     <View
@@ -29,8 +31,8 @@ export function TraitGauge({ traitKey, label, value, low, high }: TraitGaugeProp
       testID={`trait-gauge-${traitKey}`}
       accessible
       accessibilityRole="progressbar"
-      accessibilityLabel={`${label}: ${valueLabel}`}
-      accessibilityValue={{ min: scale.min, max: scale.max, now: value ?? undefined, text: valueLabel }}>
+      // No accessibilityValue: Android appends its text to the label, so the score would be read twice.
+      accessibilityLabel={spokenLabel}>
       <View style={styles.header}>
         <ThemedText type="smallBold">{label}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
