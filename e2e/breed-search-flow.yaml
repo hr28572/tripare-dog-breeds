@@ -15,27 +15,33 @@ env:
 - launchApp
 - openLink: ${EXPO_URL}
 
-# Expo Go may show a one-time prompt, and on Android it opens its developer menu the
-# first time a project loads. Dismiss both if present.
-- tapOn:
-    text: "Continue"
-    optional: true
+# On a fresh Expo Go install, a developer-menu onboarding sheet ("Continue") appears
+# only after the JS bundle has loaded, which can take 20 s+ on a CI runner. Wait for
+# either that sheet or the app's search field (Maestro text matchers are regexes),
+# dismiss the sheet if it is there, and also close the developer menu Expo Go opens
+# the first time a project loads on Android.
 - extendedWaitUntil:
-    visible: "Breeds"
-    timeout: 60000
+    visible: "Continue|Search breeds"
+    timeout: 120000
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
 - runFlow:
     when:
       visible: "Toggle performance monitor"
     commands:
       - back
-
-# The list is served from SQLite; wait for the first sync on a fresh install.
 - extendedWaitUntil:
     visible: "Search breeds"
     timeout: 60000
+
+# The list is served from SQLite; the first sync (6 API pages + 7,000 image rows)
+# can take a couple of minutes on a cold emulator.
 - extendedWaitUntil:
     visible: "FOUNDATION STOCK SERVICE"
-    timeout: 90000
+    timeout: 180000
 
 # Search for a specific breed
 # No hideKeyboard here: on Android Maestro implements it as a back press, which in
