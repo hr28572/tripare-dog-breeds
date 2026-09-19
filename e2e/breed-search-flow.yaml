@@ -22,7 +22,7 @@ env:
 # time a project loads on Android.
 - extendedWaitUntil:
     visible: "Continue"
-    timeout: 45000
+    timeout: 60000
     optional: true
 - runFlow:
     when:
@@ -36,7 +36,7 @@ env:
       - back
 - extendedWaitUntil:
     visible: "Search breeds"
-    timeout: 60000
+    timeout: 120000
 
 # The list is served from SQLite; the first sync (6 API pages + 7,000 image rows)
 # can take a couple of minutes on a cold emulator.

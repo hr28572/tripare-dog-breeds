@@ -96,12 +96,18 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
+          cores: 4
           arch: x86_64
           target: google_apis
           profile: pixel_7
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: |
+            # The 2-core software-rendered emulator is slow enough that system apps
+            # (e.g. Pixel Launcher) throw "isn't responding" dialogs over the app,
+            # which hide the elements Maestro waits for. Suppress ANR/crash dialogs.
+            adb shell settings put global hide_error_dialogs 1
+            adb shell settings put secure show_first_crash_dialog 0
             adb install -r expo-go.apk
             adb shell pm list packages | grep host.exp.exponent
             maestro test e2e/breed-search-flow.yaml
