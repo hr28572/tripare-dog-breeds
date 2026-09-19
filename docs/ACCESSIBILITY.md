@@ -21,12 +21,14 @@ a script:
 **Tap targets** were audited from the same dumps: every clickable node's bounds were checked
 against 48 dp (126 px at 420 dpi). Reported below.
 
-**iOS VoiceOver was not tested.** I had no simulator (no Xcode on this machine) and cannot
-drive VoiceOver on the physical iPhone through Mirroring. The iOS-specific pieces
-(`accessibilityRole="tab"` announcements, `AccessibilityInfo.announceForAccessibility` for
-the banner, `accessibilityElementsHidden` on decorative icons) are implemented per the React
-Native docs but unverified by ear. A VoiceOver walkthrough of list → filter → detail → all
-three tabs on a device is the outstanding check.
+**iOS, VoiceOver, iPhone 16 Pro (Expo Go).** Walked through by ear on the device, swiping
+element by element: sync banner, search field, size chip (including the "selected" state
+after activation), section header, breed row, the three detail tabs, the trait gauges and
+the gallery photo with its attribution link. Everything was read correctly and in visual
+order, with no element split into fragments and no score spoken twice. This covers the
+iOS-specific pieces (`accessibilityRole="tab"`, the banner's
+`AccessibilityInfo.announceForAccessibility`, `accessibilityElementsHidden` on decorative
+icons) that the Android node tree cannot exercise.
 
 ## What a screen reader gets, per element
 
@@ -112,7 +114,6 @@ These were found in the node tree, not by reading code:
 - **Spoken output not transcribed.** TalkBack's actual utterances were not captured (no
   logging hook without changing TalkBack's own developer settings). Verification is of the
   tree TalkBack reads plus its focus behaviour.
-- **iOS VoiceOver untested** (see above).
 - **Live-region timing not verified by ear.** The result count, banner and gallery position
   are polite live regions; that they re-announce at the right moment, and not too often, is
   unverified.

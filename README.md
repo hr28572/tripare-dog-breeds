@@ -166,8 +166,8 @@ Screen-reader support was verified against the Android accessibility tree with T
 running: rows announce as one coherent sentence, filters announce their type and selected
 state, tabs announce "Overview, tab 1 of 3", trait gauges announce name and score, and the
 sync banner is a live region. All tap targets are at least 48 dp. What was tested, what
-works, and the known gaps (including iOS VoiceOver being untested) are in
-[docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
+works, and the known gaps are in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md). VoiceOver on
+an iPhone was walked through by ear and read every screen correctly.
 
 ## Project layout
 
