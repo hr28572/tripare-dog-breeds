@@ -16,13 +16,14 @@ env:
 - openLink: ${EXPO_URL}
 
 # On a fresh Expo Go install, a developer-menu onboarding sheet ("Continue") appears
-# only after the JS bundle has loaded, which can take 20 s+ on a CI runner. Wait for
-# either that sheet or the app's search field (Maestro text matchers are regexes),
-# dismiss the sheet if it is there, and also close the developer menu Expo Go opens
-# the first time a project loads on Android.
+# only after the JS bundle has loaded, which can take 20 s+ on a CI runner. Give it
+# up to 45 s to show up (optional, so an already-onboarded Expo Go just moves on),
+# dismiss it if present, and also close the developer menu Expo Go opens the first
+# time a project loads on Android.
 - extendedWaitUntil:
-    visible: "Continue|Search breeds"
-    timeout: 120000
+    visible: "Continue"
+    timeout: 45000
+    optional: true
 - runFlow:
     when:
       visible: "Continue"
