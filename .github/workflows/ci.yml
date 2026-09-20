@@ -14,7 +14,7 @@ concurrency:
 jobs:
   check:
     name: Typecheck, lint, tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
@@ -46,7 +46,7 @@ jobs:
     # attempted: Maestro cannot drive a physical iPhone and macOS runners with a
     # simulator cost ~10x the Linux minutes for the same coverage.
     name: E2E (Maestro, Android emulator)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 40
     needs: check
     steps:
