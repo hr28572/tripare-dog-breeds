@@ -37,7 +37,20 @@
       ],
       "expo-status-bar",
       "expo-sqlite",
-      "@rnrepo/expo-config-plugin"
+      "@rnrepo/expo-config-plugin",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraProguardRules": "# gesture-handler optionally references react-native-svg, which this app does not ship\n-dontwarn com.horcrux.svg.**",
+            "buildArchs": [
+              "arm64-v8a"
+            ]
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

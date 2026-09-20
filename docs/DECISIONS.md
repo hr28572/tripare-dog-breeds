@@ -115,6 +115,14 @@ development bundle, with a 2 ms list query (see PERFORMANCE.md).
 
 ## 7. Smaller decisions
 
+- **Release APK: arm64 only, R8 on.** `expo-build-properties` sets `buildArchs` to
+  `arm64-v8a` and enables R8 minification and resource shrinking, taking the release APK from
+  110 MB (four ABIs, unminified) to 37 MB. Dropping armeabi-v7a is deliberate: Play has required 64-bit
+  builds since 2019 and 32-bit-only phones are out of the app's target range, and it saved
+  15 MB. Emulators on Apple-silicon Macs are arm64 so local builds are unaffected; an Intel
+  emulator needs `x86_64` added back. A `-dontwarn com.horcrux.svg.**` rule is appended
+  because gesture-handler references react-native-svg, which is not installed. Numbers and
+  the verification are in PERFORMANCE.md.
 - **"Wire" in the coat filter.** The brief lists coat options as short/medium/long/wire, but
   the API stores length (hairless/short/medium/long) and type (wire, double, smooth, curly, …)
   as separate fields. The filter exposes all four lengths plus "wire", and "wire" matches

@@ -129,7 +129,7 @@ Pixel 7 emulator. Full tables and method in [docs/PERFORMANCE.md](docs/PERFORMAN
 
 | Metric | Result |
 |---|---|
-| JS bundle (production Hermes bytecode) | iOS 3.52 MB · Android 3.80 MB · universal release APK 108 MB |
+| JS bundle (production Hermes bytecode) | iOS 3.52 MB · Android 3.80 MB · Android release APK 37 MB (arm64, R8; was 110 MB universal and unminified) |
 | Load to interactive with cached data (release, warm start) | activity 574 ms, list on screen ~1 s (target < 3 s) |
 | Scroll through all 283 breeds | UI 60 fps · JS 56–60 fps |
 | Search / filter interactions | 60 fps · list re-query 18–55 ms |

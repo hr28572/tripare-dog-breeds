@@ -62,12 +62,25 @@ safe-area-context, netinfo and masked-view instead of compiling them.
 | Android JS bundle (`.hbc`) | **3.80 MB** |
 | Assets (53 files) | 5.0 MB |
 | Export total | 12 MB |
-| Android release APK, universal (all 4 ABIs, no ABI splits, no resource shrinking) | 108 MB |
+| Android release APK, arm64-v8a, R8 + resource shrinking (the default since 2026-09-20) | **37 MB** |
+| Android release APK, universal (all 4 ABIs, unminified) — the earlier default | 110 MB |
 
-The universal APK is dominated by native libraries × 4 ABIs (Hermes, React Native, SQLite,
-Reanimated, expo-image, Skia-free). A per-ABI split or an AAB delivered through Play would
-ship roughly a quarter of that per device; that packaging is deliberately out of scope
-("production deployment setup" is listed as not expected).
+The 110 MB universal APK broke down as 81.5 MB of native libraries across four ABIs
+(x86_64 22.8, x86 22.6, arm64-v8a 21.4, armeabi-v7a 14.7), 41.7 MB of unminified DEX,
+5.8 MB of resources and the 3.1 MB Hermes bundle. Two changes, both made through
+`expo-build-properties` in `app.json` so they survive `expo prebuild`, bring it to 37 MB:
+`buildArchs: ["arm64-v8a"]` drops the two emulator-only x86 ABIs and 32-bit ARM (every
+Android phone sold since 2019 is 64-bit and Play requires it), and
+`enableMinifyInReleaseBuilds` + `enableShrinkResourcesInReleaseBuilds` run R8, which cut the
+DEX from 41.7 MB to 14.7 MB. R8 needs one extra rule, `-dontwarn com.horcrux.svg.**`,
+because react-native-gesture-handler optionally references react-native-svg classes that
+this app does not install. The minified build was checked on the emulator: first sync,
+list, filters, detail Overview/Traits/Gallery with attribution and paging all behave the
+same, and logcat shows no JS or native errors. Resources barely shrank (5.8 → 5.7 MB); the
+icon-font note below still applies. An x86 emulator (Intel host) needs `x86_64` added back
+to `buildArchs`, or `-PreactNativeArchitectures=x86_64` on the Gradle command. For Play,
+`./gradlew :app:bundleRelease` produces an AAB and Play serves each device only its own
+split, which is smaller again.
 
 The assets are dominated by `@expo/vector-icons` font files (every font family ships with
 the package even though only Ionicons is used; MaterialIcons alone is 357 KB) and the
