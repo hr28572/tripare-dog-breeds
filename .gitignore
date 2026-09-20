@@ -41,3 +41,9 @@ example
 # generated native folders
 /ios
 /android
+
+# local tooling and CI config, kept out of the repo
+/.claude
+/.github/workflows
+/AGENTS.md
+/CLAUDE.md
