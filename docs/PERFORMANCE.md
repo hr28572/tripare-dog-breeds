@@ -95,6 +95,15 @@ displayed after **574 ms**; screenshots taken every 0.5 s show the splash at 0.5
 full grouped list with thumbnails at 1.0 s. First-ever launch (empty cache) displayed the
 activity in 3.1 s and completed the 283-breed sync in the background behind the banner.
 
+**First launch on a slow network** (release build, emulator throttled to UMTS speed and
+latency with `adb emu network speed umts` / `network delay umts`, screenshot every second
+from `am start`): the sync used to write all six pages in one transaction after the last one
+arrived, so the list showed "Loading breeds…" until **13 s** (a user reported 20 s on a real
+device over mobile data). Since 2026-09-20 each page is written as it lands: the first 50
+breeds are on screen at **4 s** with the banner reading "Syncing breeds… 50 of 283", all
+283 are in by **10 s**, and the remaining seconds are thumbnail prefetch behind the banner.
+The change is in `runSync` (`src/db/sync.ts`) and is covered by the integration tests.
+
 `startup.firstRow` (in-app mark) measures from JS start to the first render that contains
 breed rows, with 283 breeds already cached, in Expo Go:
 

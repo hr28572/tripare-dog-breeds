@@ -26,7 +26,14 @@ export function describeSyncStatus(
   now: number,
 ): { text: string; tone: Tone; canRetry: boolean; icon: keyof typeof Ionicons.glyphMap } {
   const ago = formatRelativeTime(s.lastSyncedAt, now);
-  if (s.isSyncing) return { text: 'Syncing breeds…', tone: 'info', canRetry: false, icon: 'sync' };
+  if (s.isSyncing) {
+    const p = s.syncProgress;
+    const text =
+      p && p.totalPages > 0 && p.pagesDone < p.totalPages
+        ? `Syncing breeds… ${p.breedsWritten}${p.totalBreeds ? ` of ${p.totalBreeds}` : ''}`
+        : 'Syncing breeds…';
+    return { text, tone: 'info', canRetry: false, icon: 'sync' };
+  }
   if (!s.isOnline) {
     return s.hasCachedData
       ? { text: `Offline — showing cached data (synced ${ago})`, tone: 'warning', canRetry: false, icon: 'cloud-offline' }

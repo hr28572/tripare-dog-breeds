@@ -51,6 +51,32 @@ describe('fetchAllBreeds', () => {
     }
   });
 
+  it('reports each page to onPage as it arrives, page 1 first, with the totals', async () => {
+    fetchMock.mockImplementation(async (url) => jsonResponse(pageOf(pageNumber(url), PAGE_SIZE)));
+    const pages: number[] = [];
+    let breedsSeen = 0;
+    await fetchAllBreeds({
+      onPage: (breeds, info) => {
+        pages.push(info.page);
+        breedsSeen += breeds.length;
+        expect(info.totalPages).toBe(6);
+        expect(info.totalRecords).toBe(283);
+      },
+    });
+    expect(pages[0]).toBe(1);
+    expect([...pages].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(breedsSeen).toBe(283);
+  });
+
+  it('still reports the pages that arrived when one fails', async () => {
+    fetchMock.mockImplementation(async (url) =>
+      pageNumber(url) === 4 ? jsonResponse({ error: 'boom' }, 503) : jsonResponse(pageOf(pageNumber(url), PAGE_SIZE)),
+    );
+    const pages: number[] = [];
+    await expect(fetchAllBreeds({ onPage: (_breeds, info) => pages.push(info.page) })).rejects.toBeInstanceOf(PartialBreedsError);
+    expect([...pages].sort((a, b) => a - b)).toEqual([1, 2, 3, 5, 6]);
+  });
+
   it('propagates a plain ApiError when page 1 fails', async () => {
     fetchMock.mockResolvedValue(jsonResponse({}, 500));
     await expect(fetchAllBreeds()).rejects.toMatchObject({ kind: 'http', status: 500, isRetryable: true });

@@ -50,6 +50,15 @@ export type ImageVariant = (typeof IMAGE_VARIANTS)[number];
 
 export type SyncStatus = 'success' | 'partial' | 'failed';
 
+/** Emitted after each page of breeds is written during a sync, so the UI can show rows early. */
+export interface SyncProgress {
+  breedsWritten: number;
+  /** Total breeds the API reported, when known (from the first page's pagination meta). */
+  totalBreeds: number | null;
+  pagesDone: number;
+  totalPages: number;
+}
+
 // ---------------------------------------------------------------------------
 // Raw API shapes (as returned by https://dogapi.dog/api/v2). Everything is
 // optional/nullable here because the normalizer is responsible for validation.

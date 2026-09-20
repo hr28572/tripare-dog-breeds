@@ -18,6 +18,7 @@ function view(overrides: Partial<SyncStatusView> = {}): SyncStatusView {
     breedCount: 283,
     imageCount: 7062,
     parseFailureCount: 0,
+    syncProgress: null,
     hasCachedData: true,
     ...overrides,
   };
@@ -26,6 +27,16 @@ function view(overrides: Partial<SyncStatusView> = {}): SyncStatusView {
 describe('describeSyncStatus', () => {
   it('prioritises syncing, then offline, then failure, then partial', async () => {
     expect(describeSyncStatus(view({ isSyncing: true, isOnline: false }), NOW).text).toBe('Syncing breeds…');
+    expect(
+      describeSyncStatus(view({ isSyncing: true, syncProgress: { breedsWritten: 100, totalBreeds: 283, pagesDone: 2, totalPages: 6 } }), NOW).text,
+    ).toBe('Syncing breeds… 100 of 283');
+    expect(
+      describeSyncStatus(view({ isSyncing: true, syncProgress: { breedsWritten: 100, totalBreeds: null, pagesDone: 2, totalPages: 6 } }), NOW).text,
+    ).toBe('Syncing breeds… 100');
+    // All pages written, only the final write and thumb prefetch left: back to the plain label.
+    expect(
+      describeSyncStatus(view({ isSyncing: true, syncProgress: { breedsWritten: 283, totalBreeds: 283, pagesDone: 6, totalPages: 6 } }), NOW).text,
+    ).toBe('Syncing breeds…');
     expect(describeSyncStatus(view({ isOnline: false }), NOW)).toMatchObject({ text: 'Offline — showing cached data (synced 5 min ago)', tone: 'warning', canRetry: false });
     expect(describeSyncStatus(view({ isOnline: false, hasCachedData: false, breedCount: 0 }), NOW).tone).toBe('danger');
     expect(describeSyncStatus(view({ lastStatus: 'failed' }), NOW)).toMatchObject({ tone: 'danger', canRetry: true });

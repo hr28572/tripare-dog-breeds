@@ -90,10 +90,11 @@ testing layers, is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 `useOfflineSync` runs once at the root. It hydrates the sync store from `sync_meta`, then
 calls `runSync`, which fetches groups and all breed pages through React Query (3 retries,
 1 s → 2 s → 4 s back-off), validates and normalizes each record (deriving the size band),
-and upserts breeds, groups and image rows into SQLite in one transaction. Breeds missing from
-a fetch are pruned only when every page arrived; a partial fetch writes what came back and is
-recorded as `partial`, so cached data is never wiped by a flaky network. After the write, the
-primary thumb of each breed is prefetched. Screens then query SQLite through small repository
+and upserts breeds, groups and image rows into SQLite page by page as they arrive, so on a
+first launch the list fills from the first page onwards instead of waiting for all six.
+Breeds missing from a fetch are pruned only when every page arrived; a partial fetch writes
+what came back and is recorded as `partial`, so cached data is never wiped by a flaky
+network. After the write, the primary thumb of each breed is prefetched. Screens then query SQLite through small repository
 functions: the list runs one query with the current search and filters and groups the rows
 into sticky sections; the detail layout reads one breed and its images and refreshes it in
 the background only if the row is stale. NetInfo triggers a resync when the device comes back

@@ -83,6 +83,11 @@ export interface UpsertBreedsOptions {
    * deleted. Never set this on a partial fetch or cached breeds would vanish.
    */
   pruneMissing?: boolean;
+  /**
+   * Ids to keep when pruning; defaults to the ids in `rows`. A sync that already wrote
+   * most pages incrementally passes the full id set here with only the leftover rows.
+   */
+  keepIds?: string[];
 }
 
 /**
@@ -141,8 +146,8 @@ export function upsertBreeds(
       tx.delete(breedImages).where(where).run();
     }
 
-    if (options.pruneMissing && rows.length > 0) {
-      const ids = rows.map((r) => r.id);
+    const ids = options.keepIds ?? rows.map((r) => r.id);
+    if (options.pruneMissing && ids.length > 0) {
       const gone = tx
         .select({ localUri: breedImages.localUri })
         .from(breedImages)

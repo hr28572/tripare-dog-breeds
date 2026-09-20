@@ -4,7 +4,7 @@
  * fixture. This is the Node-side equivalent of "sync, then read in airplane mode".
  */
 import { ApiError } from '@/api/client';
-import { PartialBreedsError } from '@/api/breeds';
+import { PartialBreedsError, type BreedPageHandler } from '@/api/breeds';
 import {
   countBreeds,
   countImages,
@@ -20,6 +20,7 @@ import {
 import { runSync } from '@/db/sync';
 import { createDbImageIndex } from '@/db/imageIndex';
 import { createImageCache, type CacheFs } from '@/utils/imageCache';
+import type { SyncProgress } from '@/types/breed';
 
 import { allBreeds, groupsCollection } from './helpers/fixtures';
 import { createTestDb } from './helpers/testDb';
@@ -28,6 +29,18 @@ const online = {
   fetchBreeds: async () => allBreeds,
   fetchGroups: async () => groupsCollection.data,
 };
+
+/** Delivers the fixture in pages of 50 through onPage before resolving, like the real fetcher. */
+function streamingFetch(breeds = allBreeds, pageSize = 50) {
+  return async (onPage?: BreedPageHandler) => {
+    const totalPages = Math.ceil(breeds.length / pageSize);
+    for (let page = 1; page <= totalPages; page += 1) {
+      onPage?.(breeds.slice((page - 1) * pageSize, page * pageSize), { page, totalPages, totalRecords: breeds.length });
+    }
+    await Promise.resolve();
+    return breeds;
+  };
+}
 
 const offline = {
   fetchBreeds: async () => {
@@ -39,6 +52,42 @@ const offline = {
 };
 
 describe('runSync', () => {
+  it('writes each page as it arrives so rows are readable before the sync finishes', async () => {
+    const db = createTestDb();
+    const progress: SyncProgress[] = [];
+    const rowsAtProgress: number[] = [];
+    const result = await runSync(db, {
+      fetchGroups: online.fetchGroups,
+      fetchBreeds: streamingFetch(),
+      now: () => 1000,
+      onProgress: (p) => {
+        progress.push(p);
+        rowsAtProgress.push(countBreeds(db));
+      },
+    });
+    expect(progress.map((p) => p.pagesDone)).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(progress.map((p) => p.totalPages)).toEqual([6, 6, 6, 6, 6, 6]);
+    expect(progress[0]).toMatchObject({ breedsWritten: 50, totalBreeds: 283 });
+    expect(rowsAtProgress[0]).toBe(50);
+    expect(rowsAtProgress[5]).toBe(283);
+    // Pages are written after the groups, so no section is ever an "Unknown group" placeholder.
+    expect(listGroups(db).map((g) => g.name)).not.toContain('Unknown group');
+    expect(result.status).toBe('success');
+    expect(countBreeds(db)).toBe(283);
+    expect(countImages(db)).toBe(7062);
+    expect(getSyncMeta(db)?.breedCount).toBe(283);
+  });
+
+  it('prunes breeds missing from a complete fetch even when the pages were written incrementally', async () => {
+    const db = createTestDb();
+    await runSync(db, { ...online, now: () => 1000 });
+    expect(countBreeds(db)).toBe(283);
+    const result = await runSync(db, { fetchGroups: online.fetchGroups, fetchBreeds: streamingFetch(allBreeds.slice(1)), now: () => 2000 });
+    expect(result.status).toBe('success');
+    expect(countBreeds(db)).toBe(282);
+    expect(getBreedById(db, allBreeds[0].id)).toBeUndefined();
+  });
+
   it('writes all 283 breeds, 9 groups and 7062 image rows, then reports success', async () => {
     const db = createTestDb();
     const result = await runSync(db, { ...online, now: () => 1000 });

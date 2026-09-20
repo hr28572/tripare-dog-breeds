@@ -45,8 +45,11 @@ flowchart LR
    store from `sync_meta`, runs `runSync` on launch when the cache is older than an hour, and
    again whenever NetInfo reports the device came back online.
 2. `runSync` fetches groups and all breed pages through React Query's `fetchQuery` (shared
-   retry policy), normalizes them, upserts into SQLite in one transaction, records the outcome
-   in `sync_meta`, then prefetches primary thumbs.
+   retry policy). Groups are written the moment they arrive and each page of breeds is
+   normalized and written as it lands, with a progress event per page; the list leaves its
+   empty state after the first page instead of after the whole fetch. When every page is
+   in, the leftovers are written in one transaction (pruning only after a complete fetch),
+   the outcome is recorded in `sync_meta`, and primary thumbs are prefetched.
 3. The list reads through `useBreedsList()`: search (debounced 300 ms) and filters come from
    the Zustand filter store, one SQL query returns the rows with group name and thumb, and the
    rows are grouped into sticky sections for FlashList.

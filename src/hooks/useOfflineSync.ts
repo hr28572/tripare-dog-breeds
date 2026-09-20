@@ -32,10 +32,11 @@ export function triggerSync(): Promise<SyncResult> {
   store.setSyncing(true);
   inFlight = measureAsync('sync.total', () =>
     runSync(db, {
-      fetchBreeds: () => queryClient.fetchQuery(breedsQueryOptions()),
+      fetchBreeds: (onPage) => queryClient.fetchQuery(breedsQueryOptions(onPage)),
       fetchGroups: () => queryClient.fetchQuery(groupsQueryOptions()),
       imageCache,
       log: (message, error) => console.warn(`[sync] ${message}`, error),
+      onProgress: (progress) => useSyncStore.getState().setProgress(progress),
     }),
   )
     .then((result) => {

@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 
-import { fetchAllBreeds, fetchBreedById, fetchGroups } from './breeds';
+import { fetchAllBreeds, fetchBreedById, fetchGroups, type BreedPageHandler } from './breeds';
 import { isRetryableError } from './client';
 
 /**
@@ -33,10 +33,11 @@ export const queryKeys = {
   groups: ['groups'] as const,
 };
 
-export const breedsQueryOptions = () =>
+/** `onPage` streams pages to the caller (the sync); it does not affect the cached result. */
+export const breedsQueryOptions = (onPage?: BreedPageHandler) =>
   queryOptions({
     queryKey: queryKeys.breedsAll,
-    queryFn: ({ signal }) => fetchAllBreeds({ signal }),
+    queryFn: ({ signal }) => fetchAllBreeds({ signal, onPage }),
     retry: shouldRetry,
     retryDelay: retryDelayMs,
     staleTime: LIST_STALE_TIME_MS,

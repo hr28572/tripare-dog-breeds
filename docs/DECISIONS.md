@@ -47,10 +47,19 @@ breeds sync) recording last attempt, last successful write, status, error and co
 ## 3. Offline sync strategy
 
 - **Upsert, never replace.** `runSync` writes breeds, groups and images with
-  `INSERT … ON CONFLICT DO UPDATE` in a single transaction. Breeds absent from the response
-  are deleted only when *every* page arrived; a partial fetch writes what came back and marks
-  the run `partial`. A total failure touches nothing. Cache bookkeeping columns on images
-  survive upserts. The integration tests cover all three cases against a real database.
+  `INSERT … ON CONFLICT DO UPDATE`. Breeds absent from the response are deleted only when
+  *every* page arrived; a partial fetch writes what came back and marks the run `partial`.
+  A total failure touches nothing. Cache bookkeeping columns on images survive upserts. The
+  integration tests cover all three cases against a real database.
+- **Write page by page, show rows early.** The first version wrote all six pages in one
+  transaction after the last one arrived, so a first launch on a slow connection showed
+  "Loading breeds…" for the whole fetch (20 s on a real device over mobile data). The fetcher
+  now reports each page as it lands, the sync normalizes and writes it immediately (queued
+  behind the groups write so section titles are never placeholders) and bumps a progress
+  counter that the list and banner read: the first 50 breeds are on screen as soon as page 1
+  is in, the banner shows "Syncing breeds… 100 of 283", and the final transaction only
+  writes leftovers plus the prune. Pages already written are skipped by id, so a React Query
+  retry that re-delivers a page costs nothing.
 - **NetInfo-triggered resync.** `useOfflineSync` subscribes to NetInfo. On the first reading
   it syncs if the cache is older than an hour; on an offline→online transition it syncs again
   in the background. React Query's `onlineManager` is also wired to NetInfo so paused queries
