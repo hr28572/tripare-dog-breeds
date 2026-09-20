@@ -17,23 +17,33 @@ All numbers below are measured, not estimated. Two environments were used, both 
 |---|---|---|
 | Initial load to interactive with cached data < 3 s | Release build, warm start: activity displayed in **574 ms**, list with rows on screen by **~1 s** (`am start -W` + screenshots at 0.5 s intervals). Expo Go: **266–284 ms** JS start → first row | ✅ |
 | 60 fps scroll through all 283 breeds | UI **60 fps**, JS **56–60 fps** (Expo Go, iPhone) | ✅ |
-| Memory < 150 MB under normal use | Release build PSS: **134–141 MB** at rest, **138–160 MB (median ~150)** while flinging through the whole list; **184–226 MB** only during the one-time first-launch sync + thumbnail prefetch (see note) | ✅ at rest and browsing; marginal during continuous fast scrolling; exceeded only during the initial sync |
+| Memory < 150 MB under normal use | Release build PSS (Pixel 7 API 35 emulator, re-measured 2026-09-20): **135 MB** at rest with cached data; **172 MB** after one fling pass through all 283 breeds, **186–191 MB** on the pass back up, **197 MB** settled 30 s later; **187–207 MB** during the one-time first-launch sync + thumbnail prefetch (see note) | ✅ at rest and while browsing a group or two; ❌ after scrolling the entire list once, on an emulator with no memory pressure (upper bound, see note) |
 | Search / filter interaction stays smooth | UI/JS **60 fps** during typing and chip toggles; list re-query 18–55 ms | ✅ |
 
-**Memory note.** `dumpsys meminfo` on the release build breaks the ~134 MB resting PSS down
-as ~12 MB Java heap, ~50 MB native heap (Hermes + SQLite + decoded thumbnails), ~47 MB code
-(the JS bundle and native libraries mapped in) and ~22 MB private other. While flinging
-through the list the native heap grows to ~70–105 MB as expo-image's memory cache fills
-with decoded thumbnails, taking PSS to a 160 MB peak, then settles back to ~140 MB. The
-first launch is the exception: while the 6 API pages are parsed, 7,062 rows are inserted
-and 283 thumbnails are downloaded and decoded concurrently, PSS reaches 184 MB idle and
-226 MB if the user scrolls at the same time; this is a one-time event and drops once the
-sync finishes. Two caveats cut both ways: the emulator uses software OpenGL, so image
-surfaces that a real GPU would hold in graphics memory are counted in the native heap here;
-and an emulator has no memory pressure from other apps, so expo-image never trims its cache.
-The scroll peak is therefore an upper bound. Screenshot: `screenshots/08-memory-scroll.png`.
-In Expo Go the Hermes heap alone was 31–39 MB; the Expo Go process figure (322–478 MB)
-includes the Go shell and dev tooling and is not representative.
+**Memory note.** `dumpsys meminfo` on the release build breaks the 135 MB resting PSS down
+as ~9 MB Java heap, ~50 MB native heap (Hermes + SQLite + decoded thumbnails), ~47 MB code
+(the JS bundle and native libraries mapped in) and ~25 MB private other. Scrolling the
+whole list grows the native heap to ~103 MB and PSS to ~197 MB, and it does not come back
+down while the app stays in the foreground. The growth is expo-image's Glide layer filling
+its two fixed-size pools as each of the 283 thumbnails is decoded: an LRU memory cache sized
+at two screens of pixels (~21 MB on a 1080×2400 display) and a bitmap pool sized at four
+screens (~41 MB), neither of which expo-image exposes for tuning. Two experiments confirmed
+this: raising FlashList's `drawDistance` (commit c437868) changed nothing measurable, and
+switching the list thumbnails to `cachePolicy="disk"` cut the after-scroll figure by only
+~15 MB (164 MB after the downward pass, ~187 MB after the return pass) while making
+thumbnails visibly re-fade on the way back up, so it was not kept. The first launch is the
+other exception: while the 6 API pages are parsed, 7,062 rows are inserted and 283
+thumbnails are downloaded and decoded concurrently, PSS reaches 187–207 MB; this is a
+one-time event and drops after a restart. Two caveats cut both ways: the emulator has no
+memory pressure from other apps, so Glide never receives `onTrimMemory` and never trims its
+pools, and any image surfaces a real GPU would hold in graphics memory are counted in the
+native heap here. The after-scroll figures are therefore an upper bound; a real device that
+browses a few groups at a time stays at the resting figure. An earlier measurement in this
+document reported a 160 MB peak that settled back to ~140 MB; a full-list pass with
+per-fling sampling could not reproduce that, so the numbers above replace it. Screenshot:
+`screenshots/08-memory-scroll.png`. In Expo Go the Hermes heap alone was 31–39 MB; the Expo
+Go process figure (322–478 MB) includes the Go shell and dev tooling and is not
+representative.
 
 ## Native build time
 

@@ -133,11 +133,11 @@ Pixel 7 emulator. Full tables and method in [docs/PERFORMANCE.md](docs/PERFORMAN
 | Load to interactive with cached data (release, warm start) | activity 574 ms, list on screen ~1 s (target < 3 s) |
 | Scroll through all 283 breeds | UI 60 fps · JS 56–60 fps |
 | Search / filter interactions | 60 fps · list re-query 18–55 ms |
-| Process memory, release build (PSS) | 134–141 MB at rest · 138–160 MB while flinging the full list · up to 226 MB only during the first-launch sync (target < 150 MB) |
+| Process memory, release build (PSS) | 135 MB at rest · 172 MB after one pass through the full list · ~197 MB after scrolling back up and settling, on an emulator with no memory pressure · up to 207 MB only during the first-launch sync (target < 150 MB: met at rest, exceeded after a full-list scroll; see PERFORMANCE.md) |
 | Full sync (6 pages + 7,062 image rows + thumb prefetch) | 8.9 s, in the background |
 
 Memory screenshot: [docs/screenshots/08-memory-scroll.png](docs/screenshots/08-memory-scroll.png)
-(`dumpsys meminfo` during scroll). Profiler during a full-list scroll:
+(`dumpsys meminfo` after one pass through the full list, with the per-fling samples). Profiler during a full-list scroll:
 [docs/screenshots/07-profiler-scroll.png](docs/screenshots/07-profiler-scroll.png).
 
 ## Screenshots
