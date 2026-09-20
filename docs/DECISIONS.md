@@ -59,7 +59,11 @@ breeds sync) recording last attempt, last successful write, status, error and co
   counter that the list and banner read: the first 50 breeds are on screen as soon as page 1
   is in, the banner shows "Syncing breeds… 100 of 283", and the final transaction only
   writes leftovers plus the prune. Pages already written are skipped by id, so a React Query
-  retry that re-delivers a page costs nothing.
+  retry that re-delivers a page costs nothing. One follow-up from device testing: the list
+  remounts when it first goes from empty to populated (its `key` already changes on filter
+  changes for the same reason), because on a slower phone the transition from
+  `ListEmptyComponent` to real rows inside a live FlashList left a one-row blank under the
+  pinned header until the next page landed.
 - **NetInfo-triggered resync.** `useOfflineSync` subscribes to NetInfo. On the first reading
   it syncs if the cache is older than an hour; on an offline→online transition it syncs again
   in the background. React Query's `onlineManager` is also wired to NetInfo so paused queries

@@ -125,11 +125,15 @@ export function BreedListScreen() {
           <FilterBar onOpenSheet={() => setSheetOpen(true)} resultCount={rows.length} groupCount={groupCount} />
         </View>
         {/* Remount on filter/search change so a new result set starts at the top with a
-            fresh recycler. maintainVisibleContentPosition (on by default in FlashList v2)
-            is disabled: with sticky headers it tried to keep the previous first item in
-            place when the data set was replaced, leaving a blank gap under the header. */}
+            fresh recycler, and again when the list first goes from empty to populated: on a
+            first launch the pages arrive one by one, and on slower devices the transition
+            from ListEmptyComponent to real rows inside a live instance left a one-row blank
+            under the pinned header until the next page landed. A fresh mount takes the same
+            path as a normal cached launch. maintainVisibleContentPosition (on by default in
+            FlashList v2) is disabled: with sticky headers it tried to keep the previous first
+            item in place when the data set was replaced, leaving a blank gap under the header. */}
         <FlashList
-          key={filterKey}
+          key={`${filterKey}:${items.length > 0 ? 'data' : 'empty'}`}
           data={items}
           drawDistance={LIST_DRAW_DISTANCE}
           maintainVisibleContentPosition={{ disabled: true }}
