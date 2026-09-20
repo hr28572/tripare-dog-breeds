@@ -114,13 +114,13 @@ export function BreedListScreen() {
   return (
     <ThemedView style={styles.flex}>
       <SafeAreaView edges={['top']} style={styles.flex}>
+        <SyncBanner />
         <View style={styles.header}>
           <ThemedText type="subtitle" style={styles.title}>
             Breeds
           </ThemedText>
           <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
         </View>
-        <SyncBanner />
         <View style={styles.filters}>
           <FilterBar onOpenSheet={() => setSheetOpen(true)} resultCount={rows.length} groupCount={groupCount} />
         </View>
