@@ -203,4 +203,4 @@ resulting APK installs and runs identically (list, search, detail, gallery verif
 emulator). Two notes for whoever builds next: run app-scoped tasks (`:app:assembleRelease`),
 because a bare `./gradlew assembleRelease` still compiles every library subproject whether
 or not the app links it; and RNRepo only affects native builds, so the Expo Go dev loop and
-the CI jobs (which run in Expo Go) are unchanged.
+the Maestro flow (which runs in Expo Go) is unchanged.
