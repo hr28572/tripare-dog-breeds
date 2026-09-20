@@ -145,6 +145,12 @@ The full sync on device (`sync.total`, 6 page fetches + write + thumb prefetch) 
   layout, and FlashList v2's `maintainVisibleContentPosition` (on by default) is disabled:
   with sticky headers it tried to keep the previous first item in place when the data set
   was replaced, which left a blank gap under the header until the user scrolled.
+- **Render-ahead distance.** `drawDistance` is 800 dp instead of FlashList's default 250.
+  The recycler mounts rows on the JS thread as scroll events arrive, so with under three
+  rows of buffer a fast fling (especially reversing direction after scrolling to the
+  bottom) outran rendering and showed white space under the pinned header until it caught
+  up. 800 dp keeps roughly 12 rows mounted ahead of the scroll and 5 behind, about 18
+  extra rows of cheap views, which removed the gap in emulator fling tests.
 - **Memoized rows, stable callbacks, small row content.** A row is a thumb, two text lines, a
   size badge and three trait badges; `BreedRow` is `memo`ized with a stable `onPress`.
 - **Filtering in SQLite.** Search (name and other names), group, size band, coat length,

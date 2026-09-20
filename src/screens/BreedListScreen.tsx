@@ -1,7 +1,7 @@
 import { FlashList, type ListRenderItemInfo } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BreedRow } from '@/components/BreedRow';
@@ -26,11 +26,25 @@ import type { BreedListItem } from '@/utils/sections';
 
 let firstRowMarked = false;
 
+/**
+ * How far beyond the viewport FlashList keeps rows mounted (dp). Its default of
+ * 250 is under three rows, so a fast fling outruns the JS thread and the rows
+ * entering the viewport are still blank: white space under the pinned section
+ * header until rendering catches up. FlashList splits 2 x this value 70/30 in
+ * favour of the scroll direction, so ~12 rows are ready ahead and ~5 behind,
+ * which also covers the moment the user reverses from a downward fling.
+ */
+const LIST_DRAW_DISTANCE = 800;
+
 export function BreedListScreen() {
   const router = useRouter();
   const theme = useTheme();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pulling, setPulling] = useState(false);
+  // True while the list is dragged below its top edge (pull-to-refresh). The pinned
+  // section header must be hidden then: the real header moves down with the content
+  // under the spinner while the pinned copy stays put, so both would be visible.
+  const [overscrolled, setOverscrolled] = useState(false);
 
   const searchQuery = useFilterStore((s) => s.searchQuery);
   const setSearchQuery = useFilterStore((s) => s.setSearchQuery);
@@ -54,6 +68,11 @@ export function BreedListScreen() {
   const onRefresh = useCallback(() => {
     setPulling(true);
     void triggerSync().finally(() => setPulling(false));
+  }, []);
+
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const over = e.nativeEvent.contentOffset.y < -1;
+    setOverscrolled((prev) => (prev === over ? prev : over));
   }, []);
 
   const openBreed = useCallback((id: string) => router.push({ pathname: '/breed/[id]', params: { id } }), [router]);
@@ -112,14 +131,17 @@ export function BreedListScreen() {
         <FlashList
           key={filterKey}
           data={items}
+          drawDistance={LIST_DRAW_DISTANCE}
           maintainVisibleContentPosition={{ disabled: true }}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           getItemType={getItemType}
-          stickyHeaderIndices={stickyHeaderIndices}
+          stickyHeaderIndices={overscrolled || pulling ? undefined : stickyHeaderIndices}
           ListEmptyComponent={empty}
           refreshing={pulling}
           onRefresh={onRefresh}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ backgroundColor: theme.background }}
